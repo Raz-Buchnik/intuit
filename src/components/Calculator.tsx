@@ -119,7 +119,6 @@ const Calculator = () => {
       <Digit digit="." onClick={state.setNumber} />
       <Digit digit="0" onClick={state.setNumber} />
       <button className="span-two" onClick={() => state.equal()}>=</button>
-      Made with {'<3'} by Raz Buchnik!
     </div>
   )
 }
