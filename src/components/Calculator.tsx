@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { view, store } from "react-easy-state"
+import { makeCache } from "../utils/cache"
 
 type Method = '+' | '-' | '/' | '*'
 
@@ -7,16 +8,16 @@ const state = store({
   actions: ['0'],
   currentMethod: '',
   allowedMethods: ['+', '-', '*', '/'],
-  printSum() {
-    let actions = state.actions.join("")
+  printSum: makeCache((actionsArr: string[]) => {
+    let actions = actionsArr.join("")
     if (state.allowedMethods.includes(actions.slice(-1))) {
       actions = actions.slice(0, -1)
     }
     return eval(actions)
-  },
-  printActions() {
-    return `${state.actions.join("")}${state.currentMethod || ''}` 
-  },
+  }),
+  printActions: makeCache((actions: string[], currentMethod: string) => {
+    return `${actions.join("")}${currentMethod || ''}` 
+  }),
   clear() {
     state.actions = ['0']
     state.currentMethod = ''
@@ -39,19 +40,19 @@ const state = store({
     }
     state.actions[state.actions.length - 1] = afterDel
   },
-  setMethod(method: Method) {
-    const last = state.getLastAction()
-    if (state.currentMethod) return
-    if (last.slice(-1) == '.') return
-    state.currentMethod = method
-  },
   getLastAction() {
     return state.actions[state.actions.length - 1]
   },
   appendAction(num: string) {
     state.actions[state.actions.length - 1] += num
   },
-  typeNumber(num: string) {
+  setMethod(method: Method) {
+    const last = state.getLastAction()
+    if (state.currentMethod) return
+    if (last.slice(-1) == '.') return
+    state.currentMethod = method
+  },
+  setNumber(num: string) {
     if (state.currentMethod && num == '.') return
     const last = state.getLastAction()
     if (last == '0' && num == '0') return 
@@ -79,7 +80,7 @@ const Calculator = () => {
         return state.setMethod(key)
       }
       if (!isNaN(key) || key == '.') {
-        return state.typeNumber(key)
+        return state.setNumber(key)
       }
       if (key == 'Backspace') {
         return state.del()
@@ -97,28 +98,28 @@ const Calculator = () => {
   return (
     <div className="wrapper">
       <div className="expo-bridge">
-        <div className="last-action">{state.printActions()}</div>
-        <div className="current-action">{state.printSum()}</div>
+        <div className="last-action">{state.printActions(state.actions, state.currentMethod)}</div>
+        <div className="current-action">{state.printSum(state.actions)}</div>
       </div>
       <button className="span-two" onClick={state.clear}>AC</button>
       <button onClick={state.del}>DEL</button>
       <Method method="/" onClick={state.setMethod} />
-      <Digit digit="1" onClick={state.typeNumber} />
-      <Digit digit="2" onClick={state.typeNumber} />
-      <Digit digit="3" onClick={state.typeNumber} />
+      <Digit digit="1" onClick={state.setNumber} />
+      <Digit digit="2" onClick={state.setNumber} />
+      <Digit digit="3" onClick={state.setNumber} />
       <Method method="*" onClick={state.setMethod} />
-      <Digit digit="4" onClick={state.typeNumber} />
-      <Digit digit="5" onClick={state.typeNumber} />
-      <Digit digit="6" onClick={state.typeNumber} />
+      <Digit digit="4" onClick={state.setNumber} />
+      <Digit digit="5" onClick={state.setNumber} />
+      <Digit digit="6" onClick={state.setNumber} />
       <Method method="+" onClick={state.setMethod} />
-      <Digit digit="7" onClick={state.typeNumber} />
-      <Digit digit="8" onClick={state.typeNumber} />
-      <Digit digit="9" onClick={state.typeNumber} />
+      <Digit digit="7" onClick={state.setNumber} />
+      <Digit digit="8" onClick={state.setNumber} />
+      <Digit digit="9" onClick={state.setNumber} />
       <Method method="-" onClick={state.setMethod} />
-      <Digit digit="." onClick={state.typeNumber} />
-      <Digit digit="0" onClick={state.typeNumber} />
+      <Digit digit="." onClick={state.setNumber} />
+      <Digit digit="0" onClick={state.setNumber} />
       <button className="span-two" onClick={() => state.equal()}>=</button>
-      Made with {'<3'} by Raz Buchnik
+      Made with {'<3'} by Raz Buchnik!
     </div>
   )
 }
@@ -127,7 +128,7 @@ export default view(Calculator)
 
 interface DigitParams {
   digit: string;
-  onClick: typeof state.typeNumber;
+  onClick: typeof state.setNumber;
 }
 const Digit = ({ digit, onClick }: DigitParams) => {
   return <button onClick={() => onClick(digit)}>{digit}</button>
