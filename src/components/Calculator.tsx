@@ -118,7 +118,7 @@ const Calculator = () => {
       <Method method="-" onClick={state.setMethod} />
       <Digit digit="." onClick={state.setNumber} />
       <Digit digit="0" onClick={state.setNumber} />
-      <button className="span-two" onClick={() => state.equal()}>=</button>
+      <button className="span-two" aria-busy onClick={() => state.equal()}>=</button>
     </div>
   )
 }
