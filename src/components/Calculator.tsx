@@ -93,7 +93,7 @@ const Calculator = () => {
     return () => {
       document.removeEventListener('keyup', onKeyPress)
     }
-  })
+  }, [])
 
   return (
     <div className="wrapper">
