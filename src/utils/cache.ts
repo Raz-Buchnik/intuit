@@ -3,11 +3,12 @@ export const makeCache = (fn: Function, timeout?: number) => {
   return (...args: any[]) => {
     const cache = keys[JSON.stringify(args)]
     if (
-      !cache || 
       (
+        cache &&
         cache.timeout &&
         new Date().getTime() > cache.timeout
-      )
+      ) ||
+      !cache
     ) {
       const value = fn(...args)
       keys[JSON.stringify(args)] = {
